@@ -11,7 +11,7 @@ Decision = Literal["Approve", "Hold for Review", "Reject"]
 
 # Rules whose failure is a hard stop -- no amount of review changes the
 # outcome, so we reject outright rather than holding for a human to re-check.
-REJECT_RULES = {"approved_vendor", "po_open", "duplicate_check"}
+REJECT_RULES = {"approved_vendor", "po_open", "duplicate_check", "currency_match"}
 
 # Rules whose failure needs a human to supply missing info or make a judgment
 # call, but isn't an automatic rejection.
@@ -26,23 +26,32 @@ class DecisionResult(TypedDict):
     confidence: float
 
 
+def _rule_detail(violations: list, rules_fired: list, rule_name: str) -> str:
+    for r in violations + rules_fired:
+        if r["rule"] == rule_name:
+            return r["detail"]
+    return ""
+
+
 def decide(validation_results: dict, matched_po: dict | None, extraction_confidence: float) -> DecisionResult:
     violations = validation_results.get("violations", [])
     rules_fired = validation_results.get("rules_fired", [])
     validation_confidence = validation_results.get("confidence", 0.0)
 
-    violation_rules = {v["rule"] for v in violations}
-
     reject_hits = [v for v in violations if v["rule"] in REJECT_RULES]
     hold_hits = [v for v in violations if v["rule"] in HOLD_RULES]
 
     overall_confidence = round((validation_confidence + extraction_confidence) / 2, 2)
+    po_number = matched_po["po_number"] if matched_po else "unknown"
 
     if reject_hits:
-        reasons = "; ".join(r["detail"] for r in reject_hits)
+        # Order: duplicate > currency_match > approved_vendor > po_open (most common first)
+        priority = ["duplicate_check", "currency_match", "approved_vendor", "po_open"]
+        ordered = sorted(reject_hits, key=lambda r: priority.index(r["rule"]) if r["rule"] in priority else 99)
+        reasons = "; ".join(r["detail"] for r in ordered)
         return {
             "decision": "Reject",
-            "reasoning": f"Rejected: {reasons}",
+            "reasoning": f"Rejected — {reasons}",
             "confidence": overall_confidence,
         }
 
@@ -50,26 +59,29 @@ def decide(validation_results: dict, matched_po: dict | None, extraction_confide
         reasons = "; ".join(r["detail"] for r in hold_hits)
         return {
             "decision": "Hold for Review",
-            "reasoning": f"Held for review: {reasons}",
+            "reasoning": f"Held for review — {reasons}",
             "confidence": overall_confidence,
         }
 
     if extraction_confidence < LOW_CONFIDENCE_THRESHOLD:
-        passed_summary = "; ".join(r["detail"] for r in rules_fired if r["status"] == "pass")
         return {
             "decision": "Hold for Review",
             "reasoning": (
-                f"All validation rules passed ({passed_summary}), but field extraction "
-                f"confidence ({extraction_confidence:.2f}) is below the {LOW_CONFIDENCE_THRESHOLD} "
-                "threshold, so a human should confirm the extracted values before approval."
+                f"All {len(rules_fired)} validation rules passed against {po_number}, "
+                f"but field extraction confidence is {extraction_confidence:.2f} "
+                f"(threshold {LOW_CONFIDENCE_THRESHOLD}). A human should confirm extracted "
+                "values before approval."
             ),
             "confidence": overall_confidence,
         }
 
-    passed_summary = "; ".join(r["detail"] for r in rules_fired if r["status"] == "pass")
-    po_number = matched_po["po_number"] if matched_po else "unknown"
+    passed_rules = [r["rule"] for r in rules_fired if r["status"] == "pass"]
     return {
         "decision": "Approve",
-        "reasoning": f"Approved against {po_number}: {passed_summary}",
+        "reasoning": (
+            f"Approved against {po_number}. "
+            f"All {len(passed_rules)} rules passed: {', '.join(passed_rules)}. "
+            f"Extraction confidence: {extraction_confidence:.2f}."
+        ),
         "confidence": overall_confidence,
     }

@@ -31,6 +31,7 @@ class ExtractedFields(TypedDict):
     tax: Optional[float]
     total: Optional[float]
     po_reference: Optional[str]
+    currency: Optional[str]
     extraction_confidence: float
     extraction_method: str
 
@@ -50,17 +51,17 @@ def _regex_extract(raw_text: str) -> ExtractedFields:
     vendor = lines[0].strip() if lines else None
 
     invoice_num = None
-    m = re.search(r"Invoice\s*#:\s*(.+)", raw_text, re.IGNORECASE)
+    m = re.search(r"Invoice\s*(?:No|#|Number)\s*[:=]?\s*(\S*\d\S*)", raw_text, re.IGNORECASE)
     if m:
         invoice_num = m.group(1).strip()
 
     date = None
-    m = re.search(r"Date:\s*([\d/-]+)", raw_text, re.IGNORECASE)
+    m = re.search(r"\b(\d{4}-\d{2}-\d{2}|\d{1,2}[-/]\d{1,2}[-/]\d{2,4})\b", raw_text)
     if m:
         date = m.group(1).strip()
 
     po_reference = None
-    m = re.search(r"PO\s*Reference:\s*(\S+)", raw_text, re.IGNORECASE)
+    m = re.search(r"(?:P\.?O\.?|Purchase\s*Order)\s*(?:No|#|Ref(?:erence)?)?\s*[:=]?\s*(\S+)", raw_text, re.IGNORECASE)
     if m:
         po_reference = m.group(1).strip()
 
@@ -78,6 +79,12 @@ def _regex_extract(raw_text: str) -> ExtractedFields:
     m = re.search(rf"(?<![a-zA-Z])Total(?:\s*\(tax incl\.\))?:\s*({_MONEY})", raw_text, re.IGNORECASE)
     if m:
         total = _to_number(m.group(1))
+
+    currency = None
+    m = re.search(r"(Rs\.?|₹|INR|USD|\$|EUR|€|GBP|£)", raw_text)
+    if m:
+        sym = m.group(1)
+        currency = {"Rs": "INR", "Rs.": "INR", "₹": "INR", "$": "USD", "€": "EUR", "£": "GBP"}.get(sym, sym)
 
     line_items: list[LineItem] = []
     in_table = False
@@ -123,6 +130,7 @@ def _regex_extract(raw_text: str) -> ExtractedFields:
         "tax": tax,
         "total": total,
         "po_reference": po_reference,
+        "currency": currency,
         "extraction_confidence": round(confidence, 2),
         "extraction_method": "regex",
     }
@@ -171,6 +179,7 @@ RAW TEXT:
         "tax": parsed.get("tax"),
         "total": parsed.get("total"),
         "po_reference": parsed.get("po_reference"),
+        "currency": parsed.get("currency"),
         "extraction_confidence": round(confidence, 2),
         "extraction_method": "gemini_assist",
     }

@@ -179,6 +179,25 @@ def validate_against_po(extracted_invoice: dict, matched_po: Optional[dict]) -> 
             "detail": "No prior run found with this vendor + invoice number.",
         })
 
+    # Rule: currency match — only checked when both invoice and PO specify a currency
+    invoice_currency = extracted_invoice.get("currency")
+    po_currency = matched_po.get("currency") if matched_po else None
+    if invoice_currency and po_currency:
+        if invoice_currency.upper() == po_currency.upper():
+            rules.append({
+                "rule": "currency_match",
+                "status": "pass",
+                "severity": "critical",
+                "detail": f"Currency match: invoice={invoice_currency}, PO={po_currency}.",
+            })
+        else:
+            rules.append({
+                "rule": "currency_match",
+                "status": "fail",
+                "severity": "critical",
+                "detail": f"Currency mismatch: invoice={invoice_currency} vs PO={po_currency}.",
+            })
+
     violations = [r for r in rules if r["status"] == "fail"]
     passed = len(violations) == 0
     confidence = round(sum(1 for r in rules if r["status"] == "pass") / len(rules), 2)
