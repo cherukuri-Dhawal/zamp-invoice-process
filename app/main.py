@@ -76,7 +76,7 @@ async def run_sample(filename: str):
         raise HTTPException(status_code=404, detail="Sample not found")
 
     stage_log = []
-    ingest = ingest_pdf(filepath)
+    ingest = ingest_pdf(filepath, gemini_key=GEMINI_KEY)
     stage_log.append({"stage": "ingest", "result": {k: v for k, v in ingest.items() if k != "text"}})
     extracted = extract_fields(ingest["text"], pdf_path=filepath, gemini_key=GEMINI_KEY,
                                source_confidence=ingest["confidence"] if ingest["confidence"] > 0 else 1.0)
@@ -104,7 +104,7 @@ async def upload_invoice(file: UploadFile = File(...)):
 
     try:
         stage_log = []
-        ingest = ingest_pdf(tmp_path)
+        ingest = ingest_pdf(tmp_path, gemini_key=GEMINI_KEY)
         stage_log.append({"stage": "ingest", "result": {k: v for k, v in ingest.items() if k != "text"}})
 
         extracted = extract_fields(
