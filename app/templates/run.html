@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Run #{{ run_id }} &mdash; Zamp Invoice Processor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .mono { font-family: ui-monospace, 'Cascadia Code', monospace; }
+</style>
+</head>
+<body class="bg-[#0f172a] text-[#f1f5f9] min-h-screen">
+
+<!-- Navbar -->
+<nav class="bg-[#1e293b] border-b border-[#334155] h-16 flex items-center px-8">
+  <div class="flex items-center gap-2 flex-1">
+    <span class="text-[#6366f1] font-bold text-xl">⚡ Zamp</span>
+    <span class="text-[#94a3b8] text-sm font-medium">Invoice Processor</span>
+  </div>
+  <div class="flex items-center gap-4">
+    <a href="/dashboard" class="text-[#94a3b8] hover:text-[#f1f5f9] text-sm font-medium transition">Dashboard</a>
+    <a href="/" class="bg-[#6366f1] hover:bg-[#4f46e5] text-white text-sm font-semibold px-4 py-2 rounded-lg transition">Upload Invoice</a>
+  </div>
+</nav>
+
+{% set ext = run.extracted_json or {} %}
+{% set val = run.validation_results_json or {} %}
+{% set stage_log = run.stage_log_json or [] %}
+{% set ingest_data = namespace(v={}) %}
+{% set match_data = namespace(v={}) %}
+{% for s in stage_log %}
+  {% if s.stage == "ingest" %}{% set ingest_data.v = s.result %}{% endif %}
+  {% if s.stage == "match" %}{% set match_data.v = s.result %}{% endif %}
+{% endfor %}
+{% set dec = run.decision %}
+{% if dec == "Approve" %}
+  {% set dec_color = "text-green-400" %}
+  {% set dec_badge = "bg-green-500/20 text-green-400 border border-green-500/30" %}
+{% elif dec == "Reject" %}
+  {% set dec_color = "text-red-400" %}
+  {% set dec_badge = "bg-red-500/20 text-red-400 border border-red-500/30" %}
+{% else %}
+  {% set dec_color = "text-amber-400" %}
+  {% set dec_badge = "bg-amber-500/20 text-amber-400 border border-amber-500/30" %}
+{% endif %}
+
+<div class="max-w-6xl mx-auto px-6 py-10">
+
+  <!-- Header -->
+  <div class="mb-2 text-sm text-[#94a3b8]">
+    <a href="/dashboard" class="hover:text-[#6366f1] transition">Dashboard</a>
+    <span class="mx-2">→</span>
+    <span>Run #{{ run_id }}</span>
+  </div>
+  <div class="flex items-start justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-3xl font-bold">{{ run.uploaded_filename }}</h1>
+      <div class="text-[#94a3b8] text-sm mt-1">{{ run.timestamp[:19] | replace("T", " ") }} UTC</div>
+    </div>
+    <span class="{{ dec_badge }} px-4 py-2 rounded-full text-lg font-semibold whitespace-nowrap">{{ dec }}</span>
+  </div>
+
+  <!-- Pipeline stepper -->
+  <div class="bg-[#1e293b] rounded-2xl p-6 border border-[#334155] mb-6">
+    <div class="flex items-center justify-between">
+      {% set steps = [("1","Ingest"),("2","Extract"),("3","Match"),("4","Validate"),("5","Decide")] %}
+      {% for num, label in steps %}
+      <div class="flex flex-col items-center gap-1">
+        <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm
+          {% if loop.last %}{{ dec_color }} border-2 {{ 'border-green-500' if dec=='Approve' else 'border-red-500' if dec=='Reject' else 'border-amber-500' }}
+          {% else %}bg-[#6366f1] text-white{% endif %}">{{ num }}</div>
+        <span class="text-xs text-[#94a3b8]">{{ label }}</span>
+      </div>
+      {% if not loop.last %}
+      <div class="flex-1 h-0.5 bg-[#6366f1] mx-2 mb-5"></div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Stage 1: Ingest -->
+  <div class="bg-[#1e293b] rounded-2xl p-6 border border-[#334155] mb-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-semibold text-lg">Stage 1 &mdash; Ingest</h2>
+      <span class="text-xs font-medium px-2 py-1 rounded {{ 'bg-green-500/20 text-green-400' if ingest_data.v.has_text_layer else 'bg-amber-500/20 text-amber-400' }}">
+        {{ "TEXT LAYER" if ingest_data.v.has_text_layer else "OCR" }}
+      </span>
+    </div>
+    <div class="flex gap-4 mb-4">
+      <span class="px-3 py-1 rounded-full text-xs font-medium border {{ 'bg-green-500/10 border-green-500/30 text-green-400' if ingest_data.v.has_text_layer else 'bg-[#334155] border-[#475569] text-[#94a3b8]' }}">
+        Text Layer: {{ "YES" if ingest_data.v.has_text_layer else "NO" }}
+      </span>
+      <span class="px-3 py-1 rounded-full text-xs font-medium border {{ 'bg-amber-500/10 border-amber-500/30 text-amber-400' if ingest_data.v.ocr_used else 'bg-[#334155] border-[#475569] text-[#94a3b8]' }}">
+        OCR Used: {{ "YES" if ingest_data.v.ocr_used else "NO" }}
+      </span>
+    </div>
+    <div>
+      <div class="flex justify-between text-xs mb-1"><span class="text-[#94a3b8]">Confidence</span><span class="font-semibold">{{ (ingest_data.v.confidence or 0) | round(2) }}</span></div>
+      <div class="h-2 bg-[#334155] rounded-full overflow-hidden">
+        <div class="h-full bg-[#6366f1] rounded-full" style="width: {{ ((ingest_data.v.confidence or 0) * 100) | int }}%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage 2: Extract -->
+  <div class="bg-[#1e293b] rounded-2xl p-6 border border-[#334155] mb-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-semibold text-lg">Stage 2 &mdash; Extract</h2>
+      <span class="text-xs font-medium px-2 py-1 rounded bg-[#334155] text-[#94a3b8]">{{ ext.extraction_method or "regex" }}</span>
+    </div>
+    <div class="grid grid-cols-3 gap-4 mb-4">
+      <div>
+        <div class="text-[#94a3b8] text-xs mb-1">Vendor</div>
+        <div class="font-semibold text-sm">{{ ext.vendor or "MISSING" }}</div>
+      </div>
+      <div>
+        <div class="text-[#94a3b8] text-xs mb-1">Invoice #</div>
+        <div class="font-semibold text-sm">{{ ext.invoice_num or "MISSING" }}</div>
+      </div>
+      <div>
+        <div class="text-[#94a3b8] text-xs mb-1">Total Amount</div>
+        <div class="font-semibold text-sm">{{ ext.total or "MISSING" }}</div>
+      </div>
+    </div>
+    <div>
+      <div class="flex justify-between text-xs mb-1"><span class="text-[#94a3b8]">Extraction Confidence</span><span class="font-semibold">{{ ext.extraction_confidence }}</span></div>
+      <div class="h-2 bg-[#334155] rounded-full overflow-hidden">
+        <div class="h-full bg-[#6366f1] rounded-full" style="width: {{ ((ext.extraction_confidence or 0) * 100) | int }}%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stage 3: Match -->
+  <div class="bg-[#1e293b] rounded-2xl p-6 border border-[#334155] mb-4">
+    <h2 class="font-semibold text-lg mb-4">Stage 3 &mdash; Match</h2>
+    <div class="flex items-center gap-4">
+      <div class="text-2xl font-bold {{ 'text-[#6366f1]' if run.matched_po_number else 'text-red-400' }}">
+        {{ run.matched_po_number or "No Match" }}
+      </div>
+      {% set mtype = match_data.v.match_type or "none" %}
+      <span class="px-3 py-1 rounded-full text-xs font-semibold border
+        {{ 'bg-[#6366f1]/20 border-[#6366f1]/40 text-[#818cf8]' if mtype == 'exact'
+           else 'bg-amber-500/20 border-amber-500/40 text-amber-400' if mtype == 'partial'
+           else 'bg-red-500/20 border-red-500/40 text-red-400' }}">
+        {{ mtype }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Stage 4: Validate -->
+  <div class="bg-[#1e293b] rounded-2xl p-6 border border-[#334155] mb-4">
+    <h2 class="font-semibold text-lg mb-4">Stage 4 &mdash; Validate</h2>
+    {% set rules = val.rules_fired or [] %}
+    <div class="space-y-2">
+      {% for rule in rules %}
+      <div class="flex items-start justify-between gap-4 py-2 border-b border-[#334155] last:border-0">
+        <div class="flex items-center gap-2">
+          <span class="{{ 'text-green-400' if rule.status == 'pass' else 'text-red-400' }} text-base font-bold">
+            {{ "✓" if rule.status == "pass" else "✗" }}
+          </span>
+          <span class="text-sm font-medium">{{ rule.rule | replace("_", " ") | title }}</span>
+        </div>
+        {% if rule.status == "fail" %}
+        <span class="text-xs text-[#94a3b8] text-right max-w-sm">{{ rule.detail }}</span>
+        {% else %}
+        <span class="text-xs text-green-400/70">pass</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Stage 5: Decide -->
+  <div class="bg-[#1e293b] rounded-2xl p-6 border border-[#334155] mb-6">
+    <h2 class="font-semibold text-lg mb-4">Stage 5 &mdash; Decide</h2>
+    <div class="text-4xl font-bold {{ dec_color }} mb-4">{{ dec }}</div>
+    <div class="mb-4">
+      <div class="flex justify-between text-xs mb-1"><span class="text-[#94a3b8]">Decision Confidence</span><span class="font-semibold">{{ run.confidence }}</span></div>
+      <div class="h-2 bg-[#334155] rounded-full overflow-hidden">
+        <div class="h-full {{ 'bg-green-500' if dec=='Approve' else 'bg-red-500' if dec=='Reject' else 'bg-amber-500' }} rounded-full" style="width: {{ ((run.confidence or 0) * 100) | int }}%"></div>
+      </div>
+    </div>
+    <div class="bg-[#0f172a] rounded-xl p-4 mono text-sm text-[#94a3b8] leading-relaxed">{{ run.decision_reasoning }}</div>
+  </div>
+
+  <a href="/dashboard" class="inline-flex items-center gap-2 border border-[#6366f1] text-[#6366f1] hover:bg-[#6366f1]/10 px-5 py-2 rounded-lg text-sm font-semibold transition">
+    &larr; Back to Dashboard
+  </a>
+
+</div>
+</body>
+</html>

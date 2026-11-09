@@ -1,0 +1,290 @@
+[
+  {
+    "po_number": "PO-1001",
+    "vendor_name": "Acme Office Supplies",
+    "approved": true,
+    "po_amount": 48200.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "A4 Paper Ream (Box of 10)", "qty": 20, "unit_price": 950.00},
+      {"description": "Ballpoint Pens (Box of 50)", "qty": 10, "unit_price": 1120.00}
+    ],
+    "issue_date": "2026-09-15",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1002",
+    "vendor_name": "Bluewave IT Services",
+    "approved": true,
+    "po_amount": 125000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Laptop Maintenance Contract - Q4", "qty": 1, "unit_price": 125000.00}
+    ],
+    "issue_date": "2026-09-01",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1003",
+    "vendor_name": "Horizon Facilities Mgmt",
+    "approved": true,
+    "po_amount": 36000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Monthly Housekeeping Services", "qty": 1, "unit_price": 36000.00}
+    ],
+    "issue_date": "2026-08-20",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1004",
+    "vendor_name": "Crestline Packaging Co",
+    "approved": true,
+    "po_amount": 90000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Corrugated Boxes (Pallet)", "qty": 3, "unit_price": 30000.00}
+    ],
+    "issue_date": "2026-09-10",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1005",
+    "vendor_name": "Stratos Cloud Hosting",
+    "approved": true,
+    "po_amount": 215000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Cloud Hosting - Annual Plan", "qty": 1, "unit_price": 215000.00}
+    ],
+    "issue_date": "2026-07-05",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1006",
+    "vendor_name": "Meridian Catering Services",
+    "approved": true,
+    "po_amount": 54000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Corporate Event Catering", "qty": 1, "unit_price": 54000.00}
+    ],
+    "issue_date": "2026-09-22",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1007",
+    "vendor_name": "Falcon Logistics Pvt Ltd",
+    "approved": true,
+    "po_amount": 72000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Freight - Mumbai to Delhi (Monthly)", "qty": 1, "unit_price": 72000.00}
+    ],
+    "issue_date": "2026-09-05",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1008",
+    "vendor_name": "Pinecrest Office Interiors",
+    "approved": true,
+    "po_amount": 310000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Office Workstations (Set of 10)", "qty": 1, "unit_price": 310000.00}
+    ],
+    "issue_date": "2026-06-28",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1009",
+    "vendor_name": "Nimbus Marketing Agency",
+    "approved": true,
+    "po_amount": 180000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Q3 Digital Marketing Campaign", "qty": 1, "unit_price": 180000.00}
+    ],
+    "issue_date": "2026-07-18",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1010",
+    "vendor_name": "Oakfield Security Services",
+    "approved": true,
+    "po_amount": 96000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "On-site Security Personnel - Monthly", "qty": 1, "unit_price": 96000.00}
+    ],
+    "issue_date": "2026-09-01",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1011",
+    "vendor_name": "Vertex Industrial Supplies",
+    "approved": true,
+    "po_amount": 150000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Machine Lubricants - Bulk", "qty": 1, "unit_price": 75000.00},
+      {"description": "Industrial Filters", "qty": 1, "unit_price": 75000.00}
+    ],
+    "issue_date": "2026-08-01",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1012",
+    "vendor_name": "Glenbrook Print & Media",
+    "approved": true,
+    "po_amount": 42000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Marketing Collateral Printing", "qty": 1, "unit_price": 42000.00}
+    ],
+    "issue_date": "2026-09-12",
+    "status": "closed"
+  },
+  {
+    "po_number": "PO-1013",
+    "vendor_name": "Solstice HR Consulting",
+    "approved": true,
+    "po_amount": 65000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Recruitment Retainer - Sept", "qty": 1, "unit_price": 65000.00}
+    ],
+    "issue_date": "2026-09-01",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1014",
+    "vendor_name": "Ironclad Equipment Rentals",
+    "approved": true,
+    "po_amount": 88000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Forklift Rental - 2 Months", "qty": 1, "unit_price": 88000.00}
+    ],
+    "issue_date": "2026-08-15",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1015",
+    "vendor_name": "Coral Bay Travel Desk",
+    "approved": true,
+    "po_amount": 58000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Corporate Travel Bookings - Sept", "qty": 1, "unit_price": 58000.00}
+    ],
+    "issue_date": "2026-09-05",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1016",
+    "vendor_name": "Summit Legal Advisors",
+    "approved": false,
+    "po_amount": 120000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Contract Review Retainer", "qty": 1, "unit_price": 120000.00}
+    ],
+    "issue_date": "2026-07-01",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1017",
+    "vendor_name": "Redwood Fleet Maintenance",
+    "approved": true,
+    "po_amount": 44000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Fleet Servicing - Quarterly", "qty": 1, "unit_price": 44000.00}
+    ],
+    "issue_date": "2026-08-25",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1018",
+    "vendor_name": "Lighthouse Training Institute",
+    "approved": true,
+    "po_amount": 70000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Employee Training Workshop", "qty": 1, "unit_price": 70000.00}
+    ],
+    "issue_date": "2026-09-18",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1019",
+    "vendor_name": "TechSupplies Ltd",
+    "approved": true,
+    "po_amount": 25000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "IT Consumables - Quarterly", "qty": 1, "unit_price": 25000.00}
+    ],
+    "issue_date": "2026-09-20",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1020",
+    "vendor_name": "Global Parts Co",
+    "approved": true,
+    "po_amount": 62000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Machine Parts - Bulk Order", "qty": 1, "unit_price": 62000.00}
+    ],
+    "issue_date": "2026-09-25",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1021",
+    "vendor_name": "Metro Supplies",
+    "approved": true,
+    "po_amount": 50000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Office Supplies - Monthly", "qty": 1, "unit_price": 50000.00}
+    ],
+    "issue_date": "2026-09-28",
+    "status": "open"
+  },
+  {
+    "po_number": "PO-1022",
+    "vendor_name": "ShadySuppliers Inc",
+    "approved": false,
+    "po_amount": 15000.00,
+    "currency": "INR",
+    "tolerance_pct": 2.0,
+    "line_items": [
+      {"description": "Miscellaneous Supplies", "qty": 1, "unit_price": 15000.00}
+    ],
+    "issue_date": "2026-09-30",
+    "status": "open"
+  }
+]

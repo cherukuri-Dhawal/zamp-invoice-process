@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zamp Invoice Processor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+<style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-[#0f172a] text-[#f1f5f9] min-h-screen">
+
+<!-- Navbar -->
+<nav class="bg-[#1e293b] border-b border-[#334155] h-16 flex items-center px-8">
+  <div class="flex items-center gap-2 flex-1">
+    <span class="text-[#6366f1] font-bold text-xl">⚡ Zamp</span>
+    <span class="text-[#94a3b8] text-sm font-medium">Invoice Processor</span>
+  </div>
+  <div class="flex items-center gap-4">
+    <a href="/dashboard" class="text-[#94a3b8] hover:text-[#f1f5f9] text-sm font-medium transition">Dashboard</a>
+    <a href="/" class="bg-[#6366f1] hover:bg-[#4f46e5] text-white text-sm font-semibold px-4 py-2 rounded-lg transition">Upload Invoice</a>
+  </div>
+</nav>
+
+<div class="max-w-6xl mx-auto px-6 py-10">
+
+  <!-- Hero -->
+  <div class="text-center py-16">
+    <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-[#6366f1] to-[#a78bfa] bg-clip-text text-transparent">Invoice Processing</h1>
+    <p class="text-[#94a3b8] text-lg max-w-xl mx-auto">Upload a PDF invoice. Our pipeline will extract, match, validate and decide in seconds.</p>
+  </div>
+
+  <!-- Stat bar -->
+  <div class="grid grid-cols-3 gap-4 mb-12" x-data="stats()" x-init="load()">
+    <div class="bg-[#1e293b] rounded-xl p-6 border border-[#334155]">
+      <div class="text-3xl font-bold text-[#6366f1]" x-text="data.total ?? '—'"></div>
+      <div class="text-[#94a3b8] text-sm mt-1">📊 Total Processed</div>
+    </div>
+    <div class="bg-[#1e293b] rounded-xl p-6 border border-[#334155]">
+      <div class="text-3xl font-bold text-[#22c55e]" x-text="data.approved ?? '—'"></div>
+      <div class="text-[#94a3b8] text-sm mt-1">✅ Approved</div>
+    </div>
+    <div class="bg-[#1e293b] rounded-xl p-6 border border-[#334155]">
+      <div class="text-3xl font-bold text-[#ef4444]" x-text="data.rejected ?? '—'"></div>
+      <div class="text-[#94a3b8] text-sm mt-1">❌ Rejected</div>
+    </div>
+  </div>
+
+  <!-- Upload card -->
+  <div class="max-w-lg mx-auto">
+    <div class="bg-[#1e293b] rounded-2xl p-10 border border-[#334155]"
+         x-data="{ filename: '', dragging: false }"
+         @dragover.prevent="dragging = true"
+         @dragleave.prevent="dragging = false"
+         @drop.prevent="dragging = false; let f = $event.dataTransfer.files[0]; if(f){ filename = f.name; $refs.fileInput.files = $event.dataTransfer.files; }">
+
+      <form action="/upload" method="post" enctype="multipart/form-data" id="upload-form">
+        <!-- Drop zone -->
+        <div class="border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition"
+             :class="dragging ? 'border-[#6366f1] bg-[#6366f1]/10' : 'border-[#334155] hover:border-[#6366f1]/60'"
+             @click="$refs.fileInput.click()">
+          <div class="text-4xl mb-3">📄</div>
+          <div class="font-semibold text-[#f1f5f9] mb-1">Drag &amp; drop your invoice PDF</div>
+          <div class="text-[#94a3b8] text-sm">or click to browse</div>
+        </div>
+        <input x-ref="fileInput" type="file" name="file" accept=".pdf" class="hidden" required
+               @change="filename = $event.target.files[0]?.name || ''">
+
+        <!-- Selected file -->
+        <div x-show="filename" class="mt-4 flex items-center gap-2">
+          <span class="bg-[#22c55e]/20 text-[#22c55e] border border-[#22c55e]/30 text-xs font-medium px-3 py-1 rounded-full" x-text="filename"></span>
+        </div>
+
+        <button type="submit"
+                class="mt-6 w-full bg-[#6366f1] hover:bg-[#4f46e5] text-white font-semibold py-3 rounded-xl transition text-base">
+          Process Invoice →
+        </button>
+      </form>
+
+      <div class="mt-6 text-center">
+        <a href="/dashboard" class="text-[#94a3b8] hover:text-[#f1f5f9] text-sm transition">View all processed invoices →</a>
+      </div>
+    </div>
+
+    <!-- Sample invoices -->
+    {% if samples %}
+    <div class="mt-8">
+      <div class="text-[#94a3b8] text-xs uppercase tracking-wider font-semibold mb-3 text-center">Or run a sample invoice</div>
+      <div class="grid grid-cols-1 gap-2">
+        {% for s in samples %}
+        <form action="/run-sample/{{ s.file }}" method="post">
+          <button type="submit"
+                  class="w-full text-left px-4 py-3 bg-[#1e293b] hover:bg-[#334155] border border-[#334155] rounded-xl text-sm transition flex items-center justify-between group">
+            <span class="text-[#f1f5f9]">{{ s.label }}</span>
+            <span class="text-[#6366f1] text-xs group-hover:translate-x-0.5 transition-transform">Run →</span>
+          </button>
+        </form>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+function stats() {
+  return {
+    data: {},
+    load() {
+      fetch('/stats').then(r => r.json()).then(d => { this.data = d; });
+    }
+  };
+}
+</script>
+</body>
+</html>

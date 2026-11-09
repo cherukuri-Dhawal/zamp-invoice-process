@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard &mdash; Zamp Invoice Processor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+<style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-[#0f172a] text-[#f1f5f9] min-h-screen">
+
+<!-- Navbar -->
+<nav class="bg-[#1e293b] border-b border-[#334155] h-16 flex items-center px-8">
+  <div class="flex items-center gap-2 flex-1">
+    <span class="text-[#6366f1] font-bold text-xl">⚡ Zamp</span>
+    <span class="text-[#94a3b8] text-sm font-medium">Invoice Processor</span>
+  </div>
+  <div class="flex items-center gap-4">
+    <a href="/dashboard" class="text-[#94a3b8] hover:text-[#f1f5f9] text-sm font-medium transition">Dashboard</a>
+    <a href="/" class="bg-[#6366f1] hover:bg-[#4f46e5] text-white text-sm font-semibold px-4 py-2 rounded-lg transition">Upload Invoice</a>
+  </div>
+</nav>
+
+<script>
+  const RUNS_DATA = {{ runs | tojson }};
+</script>
+<div class="max-w-6xl mx-auto px-6 py-10"
+     x-data="dashboard()"
+     x-init="runs = RUNS_DATA">
+
+  <!-- Header -->
+  <div class="flex items-start justify-between mb-8">
+    <div>
+      <h1 class="text-4xl font-bold">Invoice Dashboard</h1>
+      <p class="text-[#94a3b8] mt-1">All processed invoices</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <!-- Reset demo — requires two clicks to prevent accidental wipes -->
+      <div x-data="{ confirm: false }">
+        <button x-show="!confirm" @click="confirm = true"
+                class="border border-[#334155] text-[#94a3b8] hover:border-red-500/50 hover:text-red-400 text-xs font-medium px-3 py-2 rounded-lg transition">
+          Reset Demo
+        </button>
+        <form x-show="confirm" action="/reset-demo" method="post" class="flex items-center gap-2">
+          <span class="text-red-400 text-xs font-medium">Wipe all runs?</span>
+          <button type="submit"
+                  class="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+            Yes, reset
+          </button>
+          <button type="button" @click="confirm = false"
+                  class="border border-[#334155] text-[#94a3b8] text-xs px-3 py-2 rounded-lg hover:text-white transition">
+            Cancel
+          </button>
+        </form>
+      </div>
+      <a href="/" class="bg-[#6366f1] hover:bg-[#4f46e5] text-white font-semibold px-5 py-2.5 rounded-xl transition text-sm">Upload New Invoice →</a>
+    </div>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="grid grid-cols-4 gap-4 mb-8">
+    <div class="bg-[#1e293b] rounded-xl p-6 border border-[#334155]">
+      <div class="text-2xl mb-1">📊</div>
+      <div class="text-3xl font-bold text-[#6366f1]" x-text="runs.length"></div>
+      <div class="text-[#94a3b8] text-sm mt-1">Total</div>
+    </div>
+    <div class="bg-[#1e293b] rounded-xl p-6 border border-[#334155]">
+      <div class="text-2xl mb-1">✅</div>
+      <div class="text-3xl font-bold text-green-400" x-text="approved()"></div>
+      <div class="text-[#94a3b8] text-sm mt-1">Approved</div>
+    </div>
+    <div class="bg-[#1e293b] rounded-xl p-6 border border-[#334155]">
+      <div class="text-2xl mb-1">⏳</div>
+      <div class="text-3xl font-bold text-amber-400" x-text="hold()"></div>
+      <div class="text-[#94a3b8] text-sm mt-1">Hold for Review</div>
+    </div>
+    <div class="bg-[#1e293b] rounded-xl p-6 border border-[#334155]">
+      <div class="text-2xl mb-1">❌</div>
+      <div class="text-3xl font-bold text-red-400" x-text="rejected()"></div>
+      <div class="text-[#94a3b8] text-sm mt-1">Rejected</div>
+    </div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="flex gap-1 mb-4 border-b border-[#334155]">
+    <template x-for="tab in ['all','Approve','Hold for Review','Reject']" :key="tab">
+      <button @click="filter = tab"
+              :class="filter === tab ? 'text-[#6366f1] border-b-2 border-[#6366f1]' : 'text-[#94a3b8] hover:text-[#f1f5f9]'"
+              class="px-4 py-2 text-sm font-medium transition capitalize"
+              x-text="tab === 'all' ? 'All' : tab">
+      </button>
+    </template>
+  </div>
+
+  <!-- Table or empty state -->
+  <template x-if="runs.length === 0">
+    <div class="text-center py-20 text-[#94a3b8]">
+      <div class="text-5xl mb-4">📭</div>
+      <div class="text-lg font-medium">No invoices processed yet</div>
+      <a href="/" class="inline-block mt-4 bg-[#6366f1] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#4f46e5] transition">Upload Invoice</a>
+    </div>
+  </template>
+
+  <template x-if="runs.length > 0">
+    <div class="bg-[#1e293b] rounded-2xl overflow-hidden border border-[#334155]">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-[#0f172a] text-[#94a3b8] text-xs uppercase tracking-wider">
+            <th class="px-4 py-3 text-left">#</th>
+            <th class="px-4 py-3 text-left">Filename</th>
+            <th class="px-4 py-3 text-left">Timestamp</th>
+            <th class="px-4 py-3 text-left">Vendor</th>
+            <th class="px-4 py-3 text-left">PO</th>
+            <th class="px-4 py-3 text-left">Decision</th>
+            <th class="px-4 py-3 text-left">Confidence</th>
+            <th class="px-4 py-3 text-left">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="run in filtered" :key="run.id">
+            <tr class="border-t border-[#334155] hover:bg-[#334155]/40 transition">
+              <td class="px-4 py-3 text-[#94a3b8]" x-text="run.id"></td>
+              <td class="px-4 py-3 font-medium max-w-[160px] truncate" x-text="run.uploaded_filename"></td>
+              <td class="px-4 py-3 text-[#94a3b8] text-xs" x-text="(run.timestamp || '').slice(0,19).replace('T',' ')"></td>
+              <td class="px-4 py-3 text-[#94a3b8]" x-text="run.extracted_json?.vendor || '—'"></td>
+              <td class="px-4 py-3 text-[#6366f1] font-medium" x-text="run.matched_po_number || '—'"></td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-1 rounded-full text-xs font-semibold"
+                      :class="run.decision === 'Approve' ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                             : run.decision === 'Reject' ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                             : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'"
+                      x-text="run.decision"></span>
+              </td>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-2">
+                  <div class="h-1.5 w-16 bg-[#334155] rounded-full overflow-hidden">
+                    <div class="h-full rounded-full"
+                         :class="run.decision === 'Approve' ? 'bg-green-500' : run.decision === 'Reject' ? 'bg-red-500' : 'bg-amber-500'"
+                         :style="`width: ${(run.confidence || 0) * 100}%`"></div>
+                  </div>
+                  <span class="text-xs text-[#94a3b8]" x-text="run.confidence"></span>
+                </div>
+              </td>
+              <td class="px-4 py-3">
+                <a :href="`/run/${run.id}`" class="text-[#6366f1] hover:text-[#818cf8] text-xs font-semibold transition">View →</a>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </template>
+
+</div>
+<script>
+function dashboard() {
+  return {
+    runs: [],
+    filter: 'all',
+    get filtered() {
+      if (this.filter === 'all') return this.runs;
+      return this.runs.filter(r => r.decision === this.filter);
+    },
+    approved() { return this.runs.filter(r => r.decision === 'Approve').length; },
+    hold()     { return this.runs.filter(r => r.decision === 'Hold for Review').length; },
+    rejected() { return this.runs.filter(r => r.decision === 'Reject').length; }
+  };
+}
+</script>
+</body>
+</html>

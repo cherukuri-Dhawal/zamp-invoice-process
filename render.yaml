@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: zamp-invoice-processor
+    runtime: docker
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false          # set manually in Render dashboard — never committed
+    healthCheckPath: /health

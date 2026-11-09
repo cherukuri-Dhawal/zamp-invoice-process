@@ -1,0 +1,62 @@
+[
+  {
+    "filename": "01_happy_path_acme.pdf",
+    "scenario": "Happy path: clean PDF, explicit PO, exact amount match",
+    "expected": "Approve"
+  },
+  {
+    "filename": "02_bundled_bluewave.pdf",
+    "scenario": "Bundled line items, tax embedded, exact match",
+    "expected": "Approve"
+  },
+  {
+    "filename": "03_implied_po_horizon.pdf",
+    "scenario": "No explicit PO number; must match via vendor+amount",
+    "expected": "Approve or Hold (ambiguous match)"
+  },
+  {
+    "filename": "04_ec3_within_tolerance_crestline.pdf",
+    "scenario": "EC3a: invoice 1.5% over PO amount (within 2% tolerance)",
+    "expected": "Approve with note"
+  },
+  {
+    "filename": "05_ec3_outside_tolerance_stratos.pdf",
+    "scenario": "EC3b: invoice 8% over PO amount (outside tolerance)",
+    "expected": "Hold for Review"
+  },
+  {
+    "filename": "06_ec4b_unapproved_vendor_summit.pdf",
+    "scenario": "EC4b: vendor not on approved list",
+    "expected": "Reject"
+  },
+  {
+    "filename": "07_ec4a_missing_invoice_number_meridian.pdf",
+    "scenario": "EC4a: missing invoice number",
+    "expected": "Hold for Review"
+  },
+  {
+    "filename": "08_ec4c_duplicate_falcon_A.pdf",
+    "scenario": "EC4c: first submission of this invoice (baseline)",
+    "expected": "Approve"
+  },
+  {
+    "filename": "09_ec4c_duplicate_falcon_B.pdf",
+    "scenario": "EC4c: duplicate re-submission (same vendor+invoice#) \u2014 submit AFTER file 08",
+    "expected": "Hold for Review (duplicate)"
+  },
+  {
+    "filename": "10_ec2_split_po_pinecrest_part1.pdf",
+    "scenario": "EC2: partial invoice 1/2 against a single PO (50% of PO amount)",
+    "expected": "Approve (partial, within PO total)"
+  },
+  {
+    "filename": "11_ec2_split_po_pinecrest_part2.pdf",
+    "scenario": "EC2: partial invoice 2/2 \u2014 cumulative matches PO total \u2014 submit AFTER file 10",
+    "expected": "Approve (cumulative == PO amount)"
+  },
+  {
+    "filename": "12_ec1_scanned_nimbus.pdf",
+    "scenario": "EC1: scanned/flattened PDF, no text layer -> OCR fallback, lower confidence",
+    "expected": "Approve with low-confidence OCR flag (or Hold if OCR garbles fields)"
+  }
+]
