@@ -22,7 +22,9 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent
 
 app = FastAPI(title="Zamp Invoice Processing")
-app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+_static_dir = BASE_DIR / "static"
+_static_dir.mkdir(exist_ok=True)
+app.mount("/static", StaticFiles(directory=_static_dir), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
